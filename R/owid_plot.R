@@ -58,19 +58,9 @@ owid_plot <- function(data = NULL, col = 4, summarise = TRUE, filter = NULL,
       filter(.data$year %in% years)
   }
 
+  title <- attributes(data)$data_info[[1]]$display$name
+
   data$value <- as.numeric(data$value)
-
-  # owid_theme <- ggplot2::theme_minimal() +
-  #   ggplot2::theme(title = ggplot2::element_text(face = "bold"),
-  #                  legend.title = ggplot2::element_blank(),
-  #                  legend.position = "top",
-  #                  panel.grid.minor = ggplot2::element_blank(),
-  #                  panel.grid.major.x = ggplot2::element_blank(),
-  #                  panel.grid.major.y = ggplot2::element_line(linetype = "dashed", colour = "grey"),
-  #                  axis.text = ggplot2::element_text(size = 11),
-  #                  plot.margin = ggplot2::margin(r = 15, b = 4, t = 4, l = 2))
-
-  # ggplot2::theme_set(theme_owid())
 
   if (colnames(data)[3] == "year") {
     entities <- unique(data$entity)
@@ -88,7 +78,7 @@ owid_plot <- function(data = NULL, col = 4, summarise = TRUE, filter = NULL,
           summarise(value = mean(.data$value, na.rm = TRUE)) %>%
           ggplot2::ggplot(ggplot2::aes(.data$year, .data$value)) +
           ggplot2::geom_line(colour = "#57677D") +
-          ggplot2::labs(title = val_name, x = "", y = "") +
+          ggplot2::labs(title = title, x = "", y = "") +
           theme_owid() +
           ggplot2::theme(panel.grid.major.x = element_blank())
 
@@ -111,11 +101,11 @@ owid_plot <- function(data = NULL, col = 4, summarise = TRUE, filter = NULL,
           filter(.data$entity %in% entities) %>%
           ggplot2::ggplot(ggplot2::aes(.data$year, .data$value, colour = .data$entity)) +
           ggplot2::geom_line() +
-          ggplot2::labs(title = val_name, x = "", y = "") +
+          ggplot2::labs(title = title, x = "", y = "") +
           theme_owid() +
           coord_cartesian(clip = "off") +
           ggplot2::theme(panel.grid.major.x = element_blank(),
-                         plot.margin = margin(5, 6*max_string_length, 5, 10),
+                         plot.margin = margin(11, 6*max_string_length, 5, 10),
                          legend.position = "none") +
           ggrepel::geom_text_repel(aes(label = .data$label),
                                    hjust = 0, xlim = Inf,
@@ -142,10 +132,10 @@ owid_plot <- function(data = NULL, col = 4, summarise = TRUE, filter = NULL,
         ggplot2::ggplot(ggplot2::aes(.data$value,
                                      forcats::fct_reorder(factor(.data$entity), .data$value))) +
         ggplot2::geom_col(fill = "#57677D") +
-        ggplot2::labs(title = val_name, x = "", y = "") +
+        ggplot2::labs(title = title, x = "", y = "") +
         theme_owid() +
         ggplot2::theme(panel.grid.major.y = element_blank(),
-                       plot.margin = margin(5, 5, 5, 10),
+                       plot.margin = margin(11, 5, 5, 10),
                        plot.title = element_text(vjust = 1)) +
         ggplot2::coord_cartesian(expand = FALSE)
     }

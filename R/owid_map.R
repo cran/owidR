@@ -26,6 +26,7 @@
 owid_map <- function(data = data.frame(), col = 4, palette = "Reds", mode = "plot", year = NULL) {
 
   # owid_readme(data)
+  .year <- year
 
   if (colnames(data)[3] == "date") {
     colnames(data)[3] <- "year"
@@ -40,9 +41,10 @@ owid_map <- function(data = data.frame(), col = 4, palette = "Reds", mode = "plo
       stop("year must be numeric")
     } else if (!year %in% unique(data$year)) {
       stop(paste("There is no data for", year))
+    } else {
+      data <- data %>%
+       filter(year == .year)
     }
-    data <- data %>%
-      filter(year == year)
   }
 
 
@@ -54,6 +56,7 @@ owid_map <- function(data = data.frame(), col = 4, palette = "Reds", mode = "plo
     colnames(data)[colnames(data) == value] <- "value"
   }
 
+  title <- attributes(data)$data_info[[1]]$display$name
 
   world <- world_map_data()
 
@@ -69,7 +72,7 @@ owid_map <- function(data = data.frame(), col = 4, palette = "Reds", mode = "plo
       ggplot2::ggplot(ggplot2::aes(fill = value, id = .data$owid_name)) +
       ggplot2::geom_sf(size = 0.05, colour = "black") + #, colour = "#dedfea"
       ggplot2::scale_fill_distiller(palette = palette, direction = 1, na.value = "grey80") +
-      ggplot2::labs(title = value) +
+      ggplot2::labs(title = title) +
       theme_owid() +
       ggplot2::theme(axis.line.x = ggplot2::element_blank(),
                      axis.ticks = ggplot2::element_blank(),
@@ -122,7 +125,7 @@ owid_map <- function(data = data.frame(), col = 4, palette = "Reds", mode = "plo
       ) %>%
       leaflet::addLegend(pal = pal_leg, values = ~value, opacity = 0.7, title = NULL,
                          position = "bottomleft", labFormat = leaflet::labelFormat()) %>%
-      leaflet::addControl(paste0("<b>", value, "<b/>"), position = "topright") %>%
+      leaflet::addControl(paste0("<b>", title, "<b/>"), position = "topright") %>%
       leaflet::addTiles("", attribution = "<a href = 'https://ourworldindata.org/' title = 'Research and data to make progress against the world\u2019s largest problems'>Our World In Data | <a/><a href = 'https://www.naturalearthdata.com/' title = 'Made with Natural Earth. Free vector and raster map data'>Natural Earth Data<a/>")
   }
 }
