@@ -3,7 +3,8 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
   fig.width = 7.2,
-  fig.height = 4
+  fig.height = 4,
+  error = TRUE
 )
 
 ## ----setup, message=FALSE-----------------------------------------------------
@@ -38,8 +39,7 @@ owid_plot(internet, summarise = FALSE, filter = c("United Kingdom", "Spain", "Ru
   scale_y_continuous(limits = c(0, 100), labels = scales::label_number(suffix = "%")) # The labels argument allows you to make it clear that the value is a percentage
 
 ## ----democ--------------------------------------------------------------------
-democracy <- owid("electoral-democracy") %>% 
-  filter(year %in% 1960:2020)
+democracy <- owid("electoral-democracy") 
 democracy
 
 owid_source(democracy)
