@@ -1,3 +1,5 @@
+globalVariables(c("name", "code", "years", "values", "entity", "year"))
+
 #' Internal function to get datasets from our world in data
 #'
 #' @noRd
@@ -60,9 +62,12 @@ get_data_url <- function(chart_id) {
   url <- sprintf("https://ourworldindata.org/grapher/%s", chart_id)
   page <- xml2::read_html(url)
   links <- rvest::html_nodes(page, "link")
+
   preload <- links[rvest::html_attr(links, "rel") == "preload"]
-  full_url <- sprintf("https://ourworldindata.org%s", rvest::html_attr(preload, "href"))
-  return(full_url)
+
+  full_urls <- sprintf("https://ourworldindata.org%s", rvest::html_attr(preload, "href"))
+
+  return(full_urls)
 }
 
 #' Get data from Our World in Data
@@ -108,69 +113,76 @@ owid <- function(chart_id = NULL, rename = NULL, tidy.date = TRUE, ...) {
     return(out)
   }
 
-  data_url <- get_data_url(chart_id)
+  data_urls <- get_data_url(chart_id)
 
+  year_is_day <- FALSE
 
-  data <- jsonlite::fromJSON(data_url)
+  if (length(data_urls) == 0) {
+    message("Unable to get data for this chart_id")
+    out <- tibble(entity = NA, year = NA, value = NA)
+    class(out) <- c("owid.no.connection", class(out))
+    return(out)
+  } else if (length(data_urls) == 2) {
 
+    df <- jsonlite::fromJSON(data_urls[1])
+    metadata <- jsonlite::fromJSON(data_urls[2])
 
-  datasets <- list()
-  for (i in 1:length(data$variables)) {
-    val_name <- data$variables[[i]]$name #%>%
-    # stringr::word(1, 3) %>%
-    # make.names()
-    # stringr::str_replace(" ", "_") %>%
-    # tolower()
-    datasets[[i]] <- tibble(
-      entity_id = data$variables[[i]]$entities,
-      year = data$variables[[i]]$years,
-      value = data$variables[[i]]$values
-    )
-    colnames(datasets[[i]])[3] <- val_name
+    entities <- as_tibble(metadata$dimensions$entities$values)
+    out <- as_tibble(df) |>
+      left_join(entities, by = c("entities" = "id")) |>
+      select(entity = name, code, year = years, values) |>
+      arrange(entity, year)
 
-    yearIsDay <- if (is.null(data$variables[[i]]$display$yearIsDay)) {
-      FALSE
-    } else (data$variables[[i]]$display$yearIsDay)
+    if (!is.null(metadata$display$yearIsDay)) year_is_day <- metadata$display$yearIsDay
+    if (!is.null(metadata$display$conversionFactor)) out[[4]] <- out[[4]] * metadata$display$conversionFactor
 
-    if (yearIsDay & tidy.date) {
-      # colnames(datasets[[i]])[2] <- "date"
-      datasets[[i]] <- datasets[[i]] %>%
-        mutate(year = as.Date(data$variables[[i]]$display$zeroDay) + .data$year)
+    if (year_is_day & tidy.date) {
+      out <- out %>%
+        mutate(year = as.Date(metadata$display$zeroDay) + .data$year)
     }
 
-    if (colnames(datasets[[i]])[3] == "Countries Continents") {
-      colnames(datasets[[i]])[3] <- "continent"
-      # datasets[[2]] <- datasets[[2]][-2]
+    display_name <- metadata$display$name
+    colnames(out)[4] <- if (!is.null(display_name)) display_name else metadata$name
+
+
+    data_info <- vector(mode = "list", length = 1)
+    data_info[[1]]$source <- metadata$source
+    data_info[[1]]$dataset_name <- metadata$name
+    data_info[[1]]$display <- metadata$display
+
+  } else {
+
+    tables <- grep("variables/data/", data_urls, value = TRUE) |>
+      lapply(\(x) jsonlite::fromJSON(x))
+
+    results <- vector("list", length(tables))
+
+    data_info <- vector(mode = "list", length = length(tables))
+
+    for (i in 1:length(tables)) {
+      metadata <- jsonlite::fromJSON(data_urls[i*2])
+      entities <- as_tibble(metadata$dimensions$entities$values)
+
+      results[[i]] <- as_tibble(tables[[i]]) |>
+        left_join(entities, by = c("entities" = "id")) |>
+        select(entity = name, code, year = years, values) |>
+        arrange(entity, year)
+
+
+      display_name <- metadata$display$name
+      colnames(results[[i]])[4] <- if (!is.null(display_name)) display_name else metadata$name
+
+
+      data_info[[i]]$source <- metadata$source
+      data_info[[i]]$dataset_name <- metadata$name
+      data_info[[i]]$display <- metadata$display
     }
+
+    out <- purrr::reduce(results, full_join, by = c("entity", "code", "year"))
 
   }
-  all_data <- purrr::reduce(datasets, full_join, by = c("entity_id", "year")) %>%
-    arrange(desc(.data$year))
 
-  entity <- vector()
-  code <- vector()
-  for (i in 1:length(data$entityKey)) {
-    entity <- c(entity, data$entityKey[[i]]$name)
-    if (is.null(data$entityKey[[i]]$code)) {
-      code <- c(code, NA)
-    } else {
-      code <- c(code, data$entityKey[[i]]$code)
-    }
-  }
-  entity_key <- tibble(
-    entity_id = as.numeric(names(data$entityKey)),
-    entity,
-    code
-  )
-
-  # data$variables[[1]]$name
-  out <- all_data %>%
-    left_join(entity_key, by = "entity_id") %>%
-    select(-.data$entity_id) %>%
-    relocate(entity, code, .data$year) %>%
-    arrange(entity, .data$year)
-
-  if (yearIsDay & tidy.date) {
+  if (year_is_day & tidy.date) {
     colnames(out)[3] <- "date"
   }
 
@@ -188,13 +200,16 @@ owid <- function(chart_id = NULL, rename = NULL, tidy.date = TRUE, ...) {
     }
   }
 
-  data_info <- vector(mode = "list", length = length(colnames(out)[4:length(colnames(out))]))
-  names(data_info) <- colnames(out)[4:length(colnames(out))]
-  for (i in 1:length(data$variables)) {
-    data_info[[i]]$source <- data$variables[[i]]$source
-    data_info[[i]]$dataset_name <- data$variables[[i]]$datasetName
-    data_info[[i]]$display <- data$variables[[i]]$display
-  }
+  # data_info <- vector(mode = "list", length = length(colnames(out)[4:length(colnames(out))]))
+  # names(data_info) <- colnames(out)[4:length(colnames(out))]
+  # for (i in 1:length(metadata)) {
+  #   data_info[[i]]$source <- data$variables[[i]]$source
+  #   data_info[[i]]$dataset_name <- data$variables[[i]]$datasetName
+  #   data_info[[i]]$display <- data$variables[[i]]$display
+  # }
+
+
+
 
   attributes(out)$data_info <- data_info
   attributes(out)$chart_id <- chart_id

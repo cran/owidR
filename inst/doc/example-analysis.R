@@ -39,7 +39,7 @@ owid_plot(internet, summarise = FALSE, filter = c("United Kingdom", "Spain", "Ru
   scale_y_continuous(limits = c(0, 100), labels = scales::label_number(suffix = "%")) # The labels argument allows you to make it clear that the value is a percentage
 
 ## ----democ--------------------------------------------------------------------
-democracy <- owid("electoral-democracy") 
+democracy <- owid("electoral-democracy", rename = c("electoral_democracy", "vdem_high", "vdem_low"))
 democracy
 
 owid_source(democracy)
@@ -70,17 +70,17 @@ data <- internet %>%
 ## ----lm_graph-----------------------------------------------------------------
 data %>% 
   filter(year == 2015) %>% 
-  ggplot(aes(internet_use, electdem_vdem_owid)) +
+  ggplot(aes(internet_use, electoral_democracy)) +
   geom_point(colour = "#57677D") +
   geom_smooth(method = "lm", colour = "#DC5E78") +
   labs(title = "Relationship Between Internet Use and Polity IV Score", x = "Internet Use", y = "Polity IV") +
   theme_owid()
 
 ## ----analysis, results='asis'-------------------------------------------------
-fe_model <- plm(electdem_vdem_owid ~ internet_use, data, 
+fe_model <- plm(electoral_democracy ~ internet_use, data, 
                 effect = c("individual"), index = "entity")
 
-fe_model_2 <- plm(electdem_vdem_owid ~ internet_use + gdp + gov_exp + age_dep + unemp, data, 
+fe_model_2 <- plm(electoral_democracy ~ internet_use + gdp + gov_exp + age_dep + unemp, data, 
                   effect = c("individual"), index = "entity")
 
 htmlreg(list(fe_model, fe_model_2))
