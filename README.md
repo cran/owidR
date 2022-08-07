@@ -9,10 +9,9 @@ status](https://www.r-pkg.org/badges/version/owidR)](https://CRAN.R-project.org/
 [![R-CMD-check](https://github.com/piersyork/owidR/workflows/R-CMD-check/badge.svg)](https://github.com/piersyork/owidR/actions)
 <!-- badges: end -->
 
-**WARNING:** Due to a change in the Our World in Data Website, owidR
-will not currently work. Download the development version for a
-temporary fix (which may have some bugs). A full fix and CRAN update
-will follow in the coming days, there will be no syntax changes.
+**WARNING:** Due to a change in the Our World in Data Website, your
+version of owidR may not work. A new version has been uploaded to CRAN,
+please update the package.
 
 This package acts as an interface to [Our World in
 Data](https://ourworldindata.org/) datasets, allowing for an easy way to
@@ -66,23 +65,25 @@ owid_search("human rights")
 Let’s use the human rights scores dataset.
 
 ``` r
+
 rights <- owid("human-rights-scores")
 
 rights
 ## # A tibble: 11,273 × 4
-##    entity      code   year human_rights_protection
-##  * <chr>       <chr> <int>                   <dbl>
-##  1 Afghanistan AFG    1946                   0.829
-##  2 Afghanistan AFG    1947                   0.878
-##  3 Afghanistan AFG    1948                   0.935
-##  4 Afghanistan AFG    1949                   0.966
-##  5 Afghanistan AFG    1950                   1.01 
-##  6 Afghanistan AFG    1951                   1.09 
-##  7 Afghanistan AFG    1952                   1.13 
-##  8 Afghanistan AFG    1953                   1.18 
-##  9 Afghanistan AFG    1954                   1.22 
-## 10 Afghanistan AFG    1955                   1.22 
+##    entity      code   year `Human rights protection`
+##  * <chr>       <chr> <int>                     <dbl>
+##  1 Afghanistan AFG    1946                     0.829
+##  2 Afghanistan AFG    1947                     0.878
+##  3 Afghanistan AFG    1948                     0.935
+##  4 Afghanistan AFG    1949                     0.966
+##  5 Afghanistan AFG    1950                     1.01 
+##  6 Afghanistan AFG    1951                     1.09 
+##  7 Afghanistan AFG    1952                     1.13 
+##  8 Afghanistan AFG    1953                     1.18 
+##  9 Afghanistan AFG    1954                     1.22 
+## 10 Afghanistan AFG    1955                     1.22 
 ## # … with 11,263 more rows
+## # ℹ Use `print(n = ...)` to see more rows
 ```
 
 `owid_plot()` makes it easy to visualise an owid dataset, plotting the
@@ -126,26 +127,27 @@ rates, using `owid_covid()`.
 covid <- owid_covid()
 
 covid
-## # A tibble: 201,032 × 67
-##    iso_code continent location date       total_cases new_cases new_cases_smoot…
-##    <chr>    <chr>     <chr>    <date>           <dbl>     <dbl>            <dbl>
-##  1 AFG      Asia      Afghani… 2020-02-24           5         5           NA    
-##  2 AFG      Asia      Afghani… 2020-02-25           5         0           NA    
-##  3 AFG      Asia      Afghani… 2020-02-26           5         0           NA    
-##  4 AFG      Asia      Afghani… 2020-02-27           5         0           NA    
-##  5 AFG      Asia      Afghani… 2020-02-28           5         0           NA    
-##  6 AFG      Asia      Afghani… 2020-02-29           5         0            0.714
-##  7 AFG      Asia      Afghani… 2020-03-01           5         0            0.714
-##  8 AFG      Asia      Afghani… 2020-03-02           5         0            0    
-##  9 AFG      Asia      Afghani… 2020-03-03           5         0            0    
-## 10 AFG      Asia      Afghani… 2020-03-04           5         0            0    
-## # … with 201,022 more rows, and 60 more variables: total_deaths <dbl>,
-## #   new_deaths <dbl>, new_deaths_smoothed <dbl>, total_cases_per_million <dbl>,
-## #   new_cases_per_million <dbl>, new_cases_smoothed_per_million <dbl>,
-## #   total_deaths_per_million <dbl>, new_deaths_per_million <dbl>,
-## #   new_deaths_smoothed_per_million <dbl>, reproduction_rate <dbl>,
-## #   icu_patients <dbl>, icu_patients_per_million <dbl>, hosp_patients <dbl>,
+## # A tibble: 206,844 × 67
+##    iso_code continent locat…¹ date       total…² new_c…³ new_c…⁴ total…⁵ new_d…⁶
+##    <chr>    <chr>     <chr>   <date>       <dbl>   <dbl>   <dbl>   <dbl>   <dbl>
+##  1 AFG      Asia      Afghan… 2020-02-24       5       5  NA          NA      NA
+##  2 AFG      Asia      Afghan… 2020-02-25       5       0  NA          NA      NA
+##  3 AFG      Asia      Afghan… 2020-02-26       5       0  NA          NA      NA
+##  4 AFG      Asia      Afghan… 2020-02-27       5       0  NA          NA      NA
+##  5 AFG      Asia      Afghan… 2020-02-28       5       0  NA          NA      NA
+##  6 AFG      Asia      Afghan… 2020-02-29       5       0   0.714      NA      NA
+##  7 AFG      Asia      Afghan… 2020-03-01       5       0   0.714      NA      NA
+##  8 AFG      Asia      Afghan… 2020-03-02       5       0   0          NA      NA
+##  9 AFG      Asia      Afghan… 2020-03-03       5       0   0          NA      NA
+## 10 AFG      Asia      Afghan… 2020-03-04       5       0   0          NA      NA
+## # … with 206,834 more rows, 58 more variables: new_deaths_smoothed <dbl>,
+## #   total_cases_per_million <dbl>, new_cases_per_million <dbl>,
+## #   new_cases_smoothed_per_million <dbl>, total_deaths_per_million <dbl>,
+## #   new_deaths_per_million <dbl>, new_deaths_smoothed_per_million <dbl>,
+## #   reproduction_rate <dbl>, icu_patients <dbl>,
+## #   icu_patients_per_million <dbl>, hosp_patients <dbl>,
 ## #   hosp_patients_per_million <dbl>, weekly_icu_admissions <dbl>, …
+## # ℹ Use `print(n = ...)` to see more rows, and `colnames()` to see all variable names
 ```
 
 ## To-do
@@ -153,4 +155,4 @@ covid
 -   [ ] Add function to load multiple country datasets into on dataframe
 -   [ ] Add caching of data (inc. backend)
 -   [ ] Remove interactive plotting to reduce dependencies
--   [ ] Plan/think of way to import owid explorers
+-   [ ] Create way to import owid explorers
