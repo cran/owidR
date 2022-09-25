@@ -14,7 +14,7 @@ owid_plot(
 )
 }
 \arguments{
-\item{data}{A tibble returned from `owid()`}
+\item{data}{A tibble returned from \code{owid()}}
 
 \item{col}{Either the column number to be treated as the value or a character string specifying the name of the value column. Defaults to 3, which is the first possible value column.}
 
@@ -24,26 +24,29 @@ owid_plot(
 
 \item{years}{The years to be included in the plot.}
 
-\item{show.all}{A logical value indicating weather all Entities should be included in the plot.}
+\item{show.all}{A logical value indicating weather all entities should be included in the plot.}
 }
 \value{
 A ggplot object.
 }
 \description{
-A wrapper around ggplot to provide an quick visualisation of owid data.
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+
+This function was deprecated to simplify the owidR package, you are encouraged to use ggplot2 instead: https://ggplot2-book.org
 }
 \examples{
 
 human_rights <- owid("human-rights-scores")
 
-# Plot average score over time
-owid_plot(human_rights)
-\donttest{
-# Plot score for a selection of countries
-owid_plot(human_rights,
-  summarise = FALSE,
-  filter = c("United Kingdom", "Sweden", "North Korea", "South Korea")
-)
-}
+# use ggplot2 instead
+library(ggplot2)
+library(dplyr)
+
+human_rights |>
+  filter(entity == "United Kingdom") |>
+  ggplot(aes(year, `Human rights protection`)) +
+  geom_line()
+
 
 }
+\keyword{internal}

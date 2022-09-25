@@ -1,6 +1,10 @@
 #' Plot an owid dataset
 #'
-#' @description A wrapper around ggplot to provide an quick visualisation of owid data.
+#' @description
+#'
+#' `r lifecycle::badge("deprecated")`
+#'
+#' This function was deprecated to simplify the owidR package, you are encouraged to use ggplot2 instead: https://ggplot2-book.org
 #'
 #'
 #' @param data A tibble returned from `owid()`
@@ -8,28 +12,34 @@
 #' @param summarise A logical value. If TRUE, plot takes the mean value. If FALSE, each entity is plotted, it is recommended to use this in conjunction with the filter argument to avoid too many entity's being plotted.
 #' @param filter The entity's to include in the plot.
 #' @param years The years to be included in the plot.
-#' @param show.all A logical value indicating weather all Entities should be included in the plot.
+#' @param show.all A logical value indicating weather all entities should be included in the plot.
 #'
 #' @return A ggplot object.
 #' @export
 #'
+#' @keywords internal
 #'
 #' @examples
 #'
 #' human_rights <- owid("human-rights-scores")
 #'
-#' # Plot average score over time
-#' owid_plot(human_rights)
-#' \donttest{
-#' # Plot score for a selection of countries
-#' owid_plot(human_rights,
-#'   summarise = FALSE,
-#'   filter = c("United Kingdom", "Sweden", "North Korea", "South Korea")
-#' )
-#' }
+#' # use ggplot2 instead
+#' library(ggplot2)
+#' library(dplyr)
+#'
+#' human_rights |>
+#'   filter(entity == "United Kingdom") |>
+#'   ggplot(aes(year, `Human rights protection`)) +
+#'   geom_line()
+#'
 #'
 owid_plot <- function(data = NULL, col = 4, summarise = TRUE, filter = NULL,
                       years = NULL, show.all = FALSE) {
+  lifecycle::deprecate_warn(
+    "1.4.0",
+    "owid_plot()",
+    "ggplot2::ggplot()"
+  )
   if (class(data)[1] == "owid.no.connection") {
     message("owid object had not connected to ourworldindata.org")
     return(ggplot())

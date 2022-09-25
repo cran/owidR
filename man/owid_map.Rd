@@ -27,16 +27,13 @@ owid_map(
 Either a ggplot2 map (for mode = "plot") or a leaflet map (for mode = "view").
 }
 \description{
-A function to easily create a choropleth world map using data from Our World in Data.
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+
+This function was deprecated to simplify the owidR package, you are encouraged to use ggplot2 instead: https://ggplot2-book.org/maps.html
 }
 \examples{
 \donttest{
 mental <- owid("share-with-mental-and-substance-disorders")
-
-# simple ggplot2 map
-owid_map(mental)
-
-# interavtive map with blue palette
-owid_map(mental, mode = "view", palette = "Blues")
 }
 }
+\keyword{internal}

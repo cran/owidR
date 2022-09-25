@@ -13,5 +13,7 @@ theme_owid(import_fonts = TRUE)
 A ggplot2 theme to be added to a ggplot2 plot.
 }
 \description{
-ggplot2 Theme in the Style of Our World in Data
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+
+This function was deprecated to simplify the owidR package, you are encouraged to instead learn ggplot2: https://ggplot2-book.org
 }

@@ -1,6 +1,10 @@
 #' Create a choropleth world map using data from Our World in Data.
 #'
-#' @description A function to easily create a choropleth world map using data from Our World in Data.
+#' @description
+#'
+#' `r lifecycle::badge("deprecated")`
+#'
+#' This function was deprecated to simplify the owidR package, you are encouraged to use ggplot2 instead: https://ggplot2-book.org/maps.html
 #'
 #' @param data A dataframe returned by owid(). This dataframe must have country names in the entity column, not all data returned by owid() will be like this.
 #' @param col Either the column number to be treated as the value or a character string specifying the name of the column. Defaults to 3, which is the first possible value column.
@@ -13,17 +17,18 @@
 #'
 #' @import sf
 #'
+#' @keywords internal
+#'
 #' @examples
 #' \donttest{
 #' mental <- owid("share-with-mental-and-substance-disorders")
-#'
-#' # simple ggplot2 map
-#' owid_map(mental)
-#'
-#' # interavtive map with blue palette
-#' owid_map(mental, mode = "view", palette = "Blues")
 #' }
 owid_map <- function(data = data.frame(), col = 4, palette = "Reds", mode = "plot", year = NULL) {
+  lifecycle::deprecate_warn(
+    "1.4.0",
+    "owid_map()",
+    "ggplot2::ggplot()"
+  )
   if (class(data)[1] == "owid.no.connection") {
     message("owid object had not connected to ourworldindata.org")
     return(ggplot())
@@ -146,6 +151,7 @@ owid_map <- function(data = data.frame(), col = 4, palette = "Reds", mode = "plo
 #' @export
 #'
 world_map_data <- function() {
+
   world <- readRDS(system.file("extdata", "world_map_sf.rds", package = "owidR"))
   return(world)
 }

@@ -74,8 +74,14 @@ pal_owid <- function(alpha) {
 
 #' Our World in Data Colour Scales
 #'
+#' @description
+#'
+#' `r lifecycle::badge("deprecated")`
+#'
+#' These functions have been deprecated to simplify the owidR package, you are encouraged to use ggplot2 instead: https://ggplot2-book.org
+#'
 #' @inheritParams pal_owid
-#' @param ... additional parameters for \code{\link[ggplot2]{discrete_scale}}
+#' @param ... additional parameters for [ggplot2::discrete_scale()]
 #'
 #' @return A ggproto object to be used in the context of ggplot2.
 #'
@@ -83,40 +89,9 @@ pal_owid <- function(alpha) {
 #'
 #' @rdname scale_owid
 #'
-#' @examples
-#' \donttest{
-#' library(ggplot2)
-#' library(dplyr)
-#' library(ggrepel)
-#'
-#' # make an Our World in Data style chart
-#'
-#' venom <- owid("incidence-of-venomous-animal-contact")
-#'
-#' colnames(venom) <- c("entity", "code", "year", "venom")
-#'
-#' # venom %>%
-#' #   filter(entity %in% c("India", "Australia", "United States", "Guyana")) %>%
-#' #   group_by(entity) %>%
-#' #   mutate(label = ifelse(year == max(year), entity, NA)) %>%
-#' #   ggplot(aes(x = year,
-#' #              y = venom,
-#' #              colour = entity)) +
-#' #   geom_line() +
-#' #   geom_point(size = 1) +
-#' #   geom_text_repel(aes(label = label),
-#' #                   hjust = 0, xlim = Inf,
-#' #                   na.rm = TRUE, segment.colour = "grey") +
-#' #   coord_cartesian(clip = "off")  +
-#' #   scale_colour_owid() +
-#' #   scale_y_continuous(limits = c(0, 1000)) +
-#' #   labs(title = "Incidence of venomous animal contact, 1990 to 2017") +
-#' #   theme_owid(import_fonts = FALSE) + # set true to use same fonts as owid
-#' #   theme(plot.margin = margin(10, 80, 5, 10), legend.position = "none",
-#' #         panel.grid.major.x = element_blank(), axis.title = element_blank())
-#' }
 #'
 scale_fill_owid <- function(alpha = 1, ...) {
+  .Deprecated()
   ggplot2::discrete_scale("fill", "owid", pal_owid(alpha), ...)
 }
 
@@ -125,6 +100,7 @@ scale_fill_owid <- function(alpha = 1, ...) {
 #'
 #' @rdname scale_owid
 scale_colour_owid <- function(alpha = 1, ...) {
+  .Deprecated()
   discrete_scale("color", "owid", pal_owid(alpha), ...)
 }
 
@@ -135,6 +111,11 @@ scale_color_owid <- scale_colour_owid
 
 #' ggplot2 Theme in the Style of Our World in Data
 #'
+#' @description
+#' `r lifecycle::badge("deprecated")`
+#'
+#' This function was deprecated to simplify the owidR package, you are encouraged to instead learn ggplot2: https://ggplot2-book.org
+#'
 #' @param import_fonts Import the fonts used by Our World in Data
 #'
 #' @return A ggplot2 theme to be added to a ggplot2 plot.
@@ -144,6 +125,11 @@ scale_color_owid <- scale_colour_owid
 #' @export
 #'
 theme_owid <- function(import_fonts = TRUE) {
+  lifecycle::deprecate_warn(
+    "1.4.0",
+    "theme_owid()",
+    "ggplot2::theme()"
+  )
   thm <- theme_minimal(base_family = "serif") %+replace%
     theme(
       text = element_text(colour = "#373737"),
