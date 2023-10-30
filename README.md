@@ -6,7 +6,7 @@ owidR
 ![CRAN downloads](http://cranlogs.r-pkg.org/badges/grand-total/owidR)
 [![CRAN
 status](https://www.r-pkg.org/badges/version/owidR)](https://CRAN.R-project.org/package=owidR)
-[![R-CMD-check](https://github.com/piersyork/owidR/workflows/R-CMD-check/badge.svg)](https://github.com/piersyork/owidR/actions)
+[![R-CMD-check](https://github.com/piersyork/owidR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/piersyork/owidR/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 This package acts as an interface to [Our World in
@@ -31,9 +31,9 @@ devtools::install_github("piersyork/owidR")
 ## Using the package
 
 The main function in owidR is `owid()`, which takes a chart id and
-returns a tibble (dataframe) of the corresponding OWID dataset. To
-search for chart ids you can use `owid_search()` to list all the chart
-ids that match a keyword or regular expression.
+returns a data.table of the corresponding OWID dataset. To search for
+chart ids you can use `owid_search()` to list all the chart ids that
+match a keyword or regular expression.
 
 ## Example
 
@@ -44,41 +44,60 @@ over time. First by searching for charts on human rights.
 library(owidR)
 
 owid_search("human rights")
-##      titles                                                                                                                                        
-## [1,] "Human rights protection vs. liberal democracy"                                                                                               
-## [2,] "Countries with National Human Rights Institutions in compliance with the Paris Principles"                                                   
-## [3,] "Human rights protection"                                                                                                                     
-## [4,] "Human rights protection vs. GDP per capita"                                                                                                  
-## [5,] "Proportion of countries that applied for accreditation as independent National Human Rights Institutions in compliance with Paris Principles"
-##      chart_id                                                      
-## [1,] "human-rights-protection-vs-liberal-democracy"                
-## [2,] "countries-in-compliance-with-paris-principles"               
-## [3,] "human-rights-protection"                                     
-## [4,] "human-rights-protection-vs-gdp-per-capita"                   
-## [5,] "countries-that-applied-for-accreditation-in-paris-principles"
+##      chart_id                                                                   
+## [1,] "human-rights-index-vs-electoral-democracy-index"                          
+## [2,] "cases-of-killed-human-rights-defenders-journalists-trade-unionists"       
+## [3,] "countries-with-independent-national-human-rights-institution"             
+## [4,] "distribution-human-rights-index-vdem"                                     
+## [5,] "human-rights-index-vdem"                                                  
+## [6,] "human-rights-index-population-weighted"                                   
+## [7,] "human-rights-index-vs-gdp-per-capita"                                     
+## [8,] "share-countries-accredited-independent-national-human-rights-institutions"
+##      title                                                                              
+## [1,] "Human rights index vs. electoral democracy index"                                 
+## [2,] "Confirmed killings of human rights defenders, journalists and trade unionists"    
+## [3,] "Countries with accredited independent national human rights institutions"         
+## [4,] "Distribution of human rights index"                                               
+## [5,] "Human rights index"                                                               
+## [6,] "Human rights index"                                                               
+## [7,] "Human rights index vs. GDP per capita"                                            
+## [8,] "Share of countries with accredited independent national human rights institutions"
 ```
 
-Let’s use the human rights protection dataset.
+Let’s use the v-dem human rights index dataset.
 
 ``` r
 
-rights <- owid("human-rights-protection")
+rights <- owid("human-rights-index-vdem")
 
 rights
-## # A tibble: 11,273 × 4
-##    entity      code   year `Human rights protection`
-##  * <chr>       <chr> <int>                     <dbl>
-##  1 Afghanistan AFG    1946                     0.829
-##  2 Afghanistan AFG    1947                     0.878
-##  3 Afghanistan AFG    1948                     0.935
-##  4 Afghanistan AFG    1949                     0.966
-##  5 Afghanistan AFG    1950                     1.01 
-##  6 Afghanistan AFG    1951                     1.09 
-##  7 Afghanistan AFG    1952                     1.13 
-##  8 Afghanistan AFG    1953                     1.18 
-##  9 Afghanistan AFG    1954                     1.22 
-## 10 Afghanistan AFG    1955                     1.22 
-## # … with 11,263 more rows
+## Key: <entity, code, year>
+##             entity   code  year civ_libs_vdem_owid civ_libs_vdem_high_owid
+##             <char> <char> <int>              <num>                   <num>
+##     1: Afghanistan    AFG  1789              0.125                   0.169
+##     2: Afghanistan    AFG  1790              0.125                   0.169
+##     3: Afghanistan    AFG  1791              0.125                   0.169
+##     4: Afghanistan    AFG  1792              0.125                   0.169
+##     5: Afghanistan    AFG  1793              0.125                   0.169
+##    ---                                                                    
+## 33373:    Zimbabwe    ZWE  2018              0.428                   0.473
+## 33374:    Zimbabwe    ZWE  2019              0.403                   0.456
+## 33375:    Zimbabwe    ZWE  2020              0.413                   0.469
+## 33376:    Zimbabwe    ZWE  2021              0.395                   0.443
+## 33377:    Zimbabwe    ZWE  2022              0.388                   0.432
+##        civ_libs_vdem_low_owid
+##                         <num>
+##     1:                  0.089
+##     2:                  0.089
+##     3:                  0.089
+##     4:                  0.089
+##     5:                  0.089
+##    ---                       
+## 33373:                  0.381
+## 33374:                  0.361
+## 33375:                  0.373
+## 33376:                  0.344
+## 33377:                  0.331
 ```
 
 ggplot2 makes it easy to visualise our data.
@@ -89,7 +108,7 @@ library(dplyr)
 
 rights |> 
   filter(entity %in% c("United Kingdom", "France", "United States")) |> 
-  ggplot(aes(year, `Human rights protection`, colour = entity)) +
+  ggplot(aes(year, civ_libs_vdem_owid, colour = entity)) +
   geom_line()
 ```
 
@@ -103,33 +122,81 @@ rates, using `owid_covid()`.
 ``` r
 covid <- owid_covid()
 
-covid
-## # A tibble: 218,713 × 67
-##    iso_code continent locat…¹ date       total…² new_c…³ new_c…⁴ total…⁵ new_d…⁶
-##    <chr>    <chr>     <chr>   <date>       <dbl>   <dbl>   <dbl>   <dbl>   <dbl>
-##  1 AFG      Asia      Afghan… 2020-02-24       5       5  NA          NA      NA
-##  2 AFG      Asia      Afghan… 2020-02-25       5       0  NA          NA      NA
-##  3 AFG      Asia      Afghan… 2020-02-26       5       0  NA          NA      NA
-##  4 AFG      Asia      Afghan… 2020-02-27       5       0  NA          NA      NA
-##  5 AFG      Asia      Afghan… 2020-02-28       5       0  NA          NA      NA
-##  6 AFG      Asia      Afghan… 2020-02-29       5       0   0.714      NA      NA
-##  7 AFG      Asia      Afghan… 2020-03-01       5       0   0.714      NA      NA
-##  8 AFG      Asia      Afghan… 2020-03-02       5       0   0          NA      NA
-##  9 AFG      Asia      Afghan… 2020-03-03       5       0   0          NA      NA
-## 10 AFG      Asia      Afghan… 2020-03-04       5       0   0          NA      NA
-## # … with 218,703 more rows, 58 more variables: new_deaths_smoothed <dbl>,
-## #   total_cases_per_million <dbl>, new_cases_per_million <dbl>,
-## #   new_cases_smoothed_per_million <dbl>, total_deaths_per_million <dbl>,
-## #   new_deaths_per_million <dbl>, new_deaths_smoothed_per_million <dbl>,
-## #   reproduction_rate <dbl>, icu_patients <dbl>,
-## #   icu_patients_per_million <dbl>, hosp_patients <dbl>,
-## #   hosp_patients_per_million <dbl>, weekly_icu_admissions <dbl>, …
+str(covid)
+## Classes 'owid', 'data.table' and 'data.frame':   351765 obs. of  67 variables:
+##  $ iso_code                                  : chr  "AFG" "AFG" "AFG" "AFG" ...
+##  $ continent                                 : chr  "Asia" "Asia" "Asia" "Asia" ...
+##  $ location                                  : chr  "Afghanistan" "Afghanistan" "Afghanistan" "Afghanistan" ...
+##  $ date                                      : IDate, format: "2020-01-03" "2020-01-04" ...
+##  $ total_cases                               : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ new_cases                                 : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ new_cases_smoothed                        : num  NA NA NA NA NA 0 0 0 0 0 ...
+##  $ total_deaths                              : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ new_deaths                                : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ new_deaths_smoothed                       : num  NA NA NA NA NA 0 0 0 0 0 ...
+##  $ total_cases_per_million                   : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ new_cases_per_million                     : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ new_cases_smoothed_per_million            : num  NA NA NA NA NA 0 0 0 0 0 ...
+##  $ total_deaths_per_million                  : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ new_deaths_per_million                    : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ new_deaths_smoothed_per_million           : num  NA NA NA NA NA 0 0 0 0 0 ...
+##  $ reproduction_rate                         : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ icu_patients                              : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ icu_patients_per_million                  : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ hosp_patients                             : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ hosp_patients_per_million                 : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ weekly_icu_admissions                     : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ weekly_icu_admissions_per_million         : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ weekly_hosp_admissions                    : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ weekly_hosp_admissions_per_million        : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ total_tests                               : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ new_tests                                 : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ total_tests_per_thousand                  : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ new_tests_per_thousand                    : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ new_tests_smoothed                        : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ new_tests_smoothed_per_thousand           : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ positive_rate                             : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ tests_per_case                            : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ tests_units                               : chr  "" "" "" "" ...
+##  $ total_vaccinations                        : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ people_vaccinated                         : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ people_fully_vaccinated                   : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ total_boosters                            : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ new_vaccinations                          : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ new_vaccinations_smoothed                 : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ total_vaccinations_per_hundred            : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ people_vaccinated_per_hundred             : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ people_fully_vaccinated_per_hundred       : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ total_boosters_per_hundred                : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ new_vaccinations_smoothed_per_million     : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ new_people_vaccinated_smoothed            : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ new_people_vaccinated_smoothed_per_hundred: num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ stringency_index                          : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ population_density                        : num  54.4 54.4 54.4 54.4 54.4 ...
+##  $ median_age                                : num  18.6 18.6 18.6 18.6 18.6 18.6 18.6 18.6 18.6 18.6 ...
+##  $ aged_65_older                             : num  2.58 2.58 2.58 2.58 2.58 ...
+##  $ aged_70_older                             : num  1.34 1.34 1.34 1.34 1.34 ...
+##  $ gdp_per_capita                            : num  1804 1804 1804 1804 1804 ...
+##  $ extreme_poverty                           : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ cardiovasc_death_rate                     : num  597 597 597 597 597 ...
+##  $ diabetes_prevalence                       : num  9.59 9.59 9.59 9.59 9.59 9.59 9.59 9.59 9.59 9.59 ...
+##  $ female_smokers                            : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ male_smokers                              : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ handwashing_facilities                    : num  37.7 37.7 37.7 37.7 37.7 ...
+##  $ hospital_beds_per_thousand                : num  0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 ...
+##  $ life_expectancy                           : num  64.8 64.8 64.8 64.8 64.8 ...
+##  $ human_development_index                   : num  0.511 0.511 0.511 0.511 0.511 0.511 0.511 0.511 0.511 0.511 ...
+##  $ population                                : num  41128772 41128772 41128772 41128772 41128772 ...
+##  $ excess_mortality_cumulative_absolute      : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ excess_mortality_cumulative               : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ excess_mortality                          : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ excess_mortality_cumulative_per_million   : num  NA NA NA NA NA NA NA NA NA NA ...
+##  - attr(*, ".internal.selfref")=<externalptr>
 ```
 
 ## To-do
 
--   [ ] Add function to load multiple country datasets into one
-    dataframe
--   [ ] Add caching of data (inc. backend)
--   [ ] Remove interactive plotting to reduce dependencies
--   [ ] Create way to import owid explorers
+- [ ] Add function to load multiple country datasets into one dataframe
+- [ ] Add caching of data (inc. backend)
+- [x] Remove interactive plotting to reduce dependencies
+- [ ] Create way to import owid explorers
